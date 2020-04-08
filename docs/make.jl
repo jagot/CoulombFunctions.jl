@@ -1,5 +1,7 @@
 using Documenter, SphericalBesselFunctions
 
+isdefined(Main, :NOPLOTS) && NOPLOTS || include("plots.jl")
+
 makedocs(;
     modules=[SphericalBesselFunctions],
     format=Documenter.HTML(),
@@ -8,8 +10,7 @@ makedocs(;
     ],
     repo="https://github.com/jagot/SphericalBesselFunctions.jl/blob/{commit}{path}#L{line}",
     sitename="SphericalBesselFunctions.jl",
-    authors="Stefanos Carlström <stefanos.carlstrom@gmail.com>",
-    assets=String[],
+    authors="Stefanos Carlström <stefanos.carlstrom@gmail.com>"
 )
 
 deploydocs(;

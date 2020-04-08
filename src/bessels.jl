@@ -50,7 +50,7 @@ It is assumed that all passed arrays are of the same lengths (not
 checked).
 
 """
-function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), kwargs...) where {J,Y,T}
+function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), kwargs...) where {J,Y,T<:Number}
     ℓmax = if isnothing(j)
         # No output requested
         isnothing(y) && return
@@ -90,4 +90,40 @@ function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), kwargs...) 
     reflect && (reflect!(j, j′); reflect!(y, y′, 1))
 end
 
-export bessels!
+"""
+    bessels!(j, j′, y, y′, x::AbstractVector; kwargs...)
+
+Loop through all values of `x` and compute all Bessel and Neumann
+functions, storing the results in the preallocated matrices `j`, `j′`,
+`y`, `y′`.
+"""
+function bessels!(j, j′, y, y′, x::AbstractVector; kwargs...)
+    size(j,1) == size(j′,1) == size(y,1) == size(y′,1) == length(x) &&
+        size(j,2) == size(j′,2) == size(y,2) == size(y′,2) ||
+        throw(DimensionError("The dimension of the output arrays do not agree"))
+    for (i,x) in enumerate(x)
+        bessels!(view(j, i, :),
+                 view(j′, i, :),
+                 view(y, i, :),
+                 view(y′, i, :),
+                 x; kwargs...)
+    end
+end
+
+"""
+    bessels(x::AbstractVector, nℓ; kwargs...)
+
+Convenience wrapper around [`bessels!`](@ref) that preallocates output
+matrices of the appropriate dimensions.
+"""
+function bessels(x::AbstractVector{T}, nℓ; kwargs...) where T
+    nx = length(x)
+    j = zeros(T, nx, nℓ)
+    j′ = zeros(T, nx, nℓ)
+    y = zeros(T, nx, nℓ)
+    y′ = zeros(T, nx, nℓ)
+    bessels!(j, j′, y, y′, x; kwargs...)
+    j, j′, y, y′
+end
+
+export bessels!, bessels

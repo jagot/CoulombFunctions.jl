@@ -4,10 +4,13 @@ os:
   - linux
   - osx
 julia:
-  - 1.0
+  - 1.4
   - nightly
 notifications:
   email: false
+script:
+ - julia -e 'using Pkg; Pkg.activate(pwd()); pkg"instantiate"; pkg"add SpecialFunctions"'
+ - julia -e 'using Pkg; Pkg.build(); Pkg.test(coverage=true)'
 after_success:
   - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
 jobs:
@@ -16,10 +19,11 @@ jobs:
   fast_finish: true
   include:
     - stage: Documentation
-      julia: 1.0
-      script: julia --project=docs -e '
-          using Pkg;
-          Pkg.develop(PackageSpec(path=pwd()));
-          Pkg.instantiate();
-          include("docs/make.jl");'
+      julia: 1.4
+      env:
+        - PYTHON=""
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()));'
+        - julia --project=docs/ -e 'using Pkg; pkg"build PyPlot"'
+        - julia --project=docs/ docs/make.jl
       after_success: skip
