@@ -1,4 +1,5 @@
 using SpecialFunctions
+using LinearAlgebra
 
 function bessels_ref!(j, j′, y, y′, x)
     for i = 1:length(j)

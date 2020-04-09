@@ -7,7 +7,6 @@ Cycler = pyimport("cycler")
 plt.rc("axes", prop_cycle=plt.rcParams["axes.prop_cycle"])
 
 using SphericalBesselFunctions
-using LinearAlgebra
 
 include(joinpath(@__DIR__, "../test/reference.jl"))
 
