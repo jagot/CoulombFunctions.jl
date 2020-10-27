@@ -4,7 +4,7 @@ using LinearAlgebra
 using Formatting
 
 include("continued_fractions.jl")
-include("recurrences.jl")
 include("bessels.jl")
+include("coulombs.jl")
 
 end # module

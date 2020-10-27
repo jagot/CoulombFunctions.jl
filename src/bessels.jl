@@ -1,3 +1,5 @@
+# * Properties
+
 """
     powneg1(m)
 
@@ -23,6 +25,86 @@ function reflect!(g, g′, offset=0)
         g′[i]
     end
 end
+
+# * Continued fractions
+
+@doc raw"""
+    bessel_fraction(x, n)
+
+Evaluated the continued fraction for the spherical Bessel function
+
+```math
+\frac{j'_n(x)}{j_n(x)} =
+\frac{n}{x} -
+\frac{1}{T_{n+1}(x)-}\frac{1}{T_{n+2}(x)-}...\frac{1}{T_k-...},
+```
+where
+```math
+T_k(x) = \frac{2k+1}{x}.
+```
+"""
+bessel_fraction(x::T, n::Integer; kwargs...) where T =
+    lentz_thompson(n/x, k -> -one(T), k -> (2(n+k)+1)/x; kwargs...)
+
+# * Recurrences
+
+function bessel_downward_recurrence!(j, j′, x⁻¹::T, sinc, cosc, nmax, cf1, s;
+                                     tol=100eps(T), verbosity=0) where T
+    nj = length(j)
+    if nmax > 1
+        jₙ = s ? 1 : -1
+        j′ₙ = cf1*jₙ
+
+        S = (nmax-1)*x⁻¹
+        for n = nmax:-1:2
+            jₙ₋₁ = (S+x⁻¹)*jₙ + j′ₙ
+            S -= x⁻¹
+            j′ₙ₋₁ = S*jₙ₋₁ - jₙ
+
+            jₙ = jₙ₋₁
+            j′ₙ = j′ₙ₋₁
+
+            if n-1 ≤ nj
+                j[n-1] = jₙ₋₁
+                j′[n-1] = j′ₙ₋₁
+            end
+        end
+    end
+
+    j′₀ = cosc - sinc*x⁻¹
+
+    if nj > 1
+        verbosity > 0 && @show sinc
+        ω = if abs(sinc) > 1e-1 # √(tol)
+            sinc/j[1]
+        else
+            -j′₀/j[2]
+        end
+        lmul!(ω, j)
+        lmul!(ω, j′)
+    end
+
+    j[1] = sinc
+    j′[1] = j′₀
+end
+
+bessel_downward_recurrence!(::Nothing, args...; _...) = nothing
+
+function neumann_upward_recurrence!(y, y′, x⁻¹::T, sinc, cosc; _...) where T
+    y[1] = -cosc
+    y′[1] = sinc + cosc*x⁻¹
+
+    S = zero(T)
+    for n = 2:length(y)
+        y[n] = S*y[n-1] - y′[n-1]
+        S += x⁻¹
+        y′[n] = y[n-1] - (S+x⁻¹)*y[n]
+    end
+end
+
+neumann_upward_recurrence!(::Nothing, args...; _...) = nothing
+
+# * Driver
 
 @doc raw"""
     bessels!(j, j′, y, y′, x)
@@ -50,7 +132,7 @@ It is assumed that all passed arrays are of the same lengths (not
 checked).
 
 """
-function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), kwargs...) where {J,Y,T<:Number}
+function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), verbosity=0, kwargs...) where {J,Y,T<:Number}
     ℓmax = if isnothing(j)
         # No output requested
         isnothing(y) && return
@@ -67,6 +149,7 @@ function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), kwargs...) 
             j .= zero(T)
             j[1] = one(T)
             j′ .= zero(T)
+            j′[2] = one(T)/3 # Derivative of Eq. 10.52.1 https://dlmf.nist.gov/10.52
         end
         if !isnothing(y)
             y .= -T(Inf)
@@ -78,17 +161,20 @@ function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), kwargs...) 
     reflect = x < zero(T)
     reflect && (x = -x)
 
-    cf1,_,_,s = bessel_fraction(x, ℓmax; kwargs...)
+    cf1,_,_,s,converged = bessel_fraction(x, ℓmax; verbosity=verbosity-1, kwargs...)
+    converged || verbosity > 0 && @info "Consider increasing ℓmax beyond $(ℓmax)"
 
     x⁻¹ = inv(x)
     sinx,cosx = sincos(x)
     sinc,cosc = sinx*x⁻¹,cosx*x⁻¹
 
-    bessel_downward_recurrence!(j, j′, x⁻¹, sinc, cosc, ℓmax+1, cf1, s; kwargs...)
+    bessel_downward_recurrence!(j, j′, x⁻¹, sinc, cosc, ℓmax+1, cf1, s; verbosity=verbosity-2, kwargs...)
     neumann_upward_recurrence!(y, y′, x⁻¹, sinc, cosc; kwargs...)
 
     reflect && (reflect!(j, j′); reflect!(y, y′, 1))
 end
+
+# * Interface
 
 """
     bessels!(j, j′, y, y′, x::AbstractVector; kwargs...)
