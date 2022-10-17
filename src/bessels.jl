@@ -49,7 +49,8 @@ bessel_fraction(x::T, n::Integer; cf_algorithm=lentz_thompson, max_iter=2ceil(In
 # * Recurrences
 
 function bessel_downward_recurrence!(j, j′, x⁻¹::T, sinc, cosc, nmax, cf1, s;
-                                     tol=100eps(T), verbosity=0, kwargs...) where T
+                                     tol=100eps(T), verbosity=0, large=1e100, kwargs...) where T
+    verbosity > 0 && @show x⁻¹, sinc, cosc, nmax, cf1, s
     nj = length(j)
     if nmax > 1
         jₙ = s ? 1 : -1
@@ -60,6 +61,15 @@ function bessel_downward_recurrence!(j, j′, x⁻¹::T, sinc, cosc, nmax, cf1, 
             jₙ₋₁ = (S+x⁻¹)*jₙ + j′ₙ
             S -= x⁻¹
             j′ₙ₋₁ = S*jₙ₋₁ - jₙ
+
+            if abs(jₙ₋₁) > large
+                verbosity > 1 && @info "Bessel downward recurrence larger than $(large), renormalizing" n jₙ₋₁ j′ₙ₋₁
+                ij = inv(jₙ₋₁)
+                jₙ₋₁ = one(jₙ₋₁)
+                j′ₙ₋₁ *= ij
+                lmul!(ij, view(j, n:nj))
+                lmul!(ij, view(j′, n:nj))
+            end
 
             jₙ = jₙ₋₁
             j′ₙ = j′ₙ₋₁
@@ -80,6 +90,7 @@ function bessel_downward_recurrence!(j, j′, x⁻¹::T, sinc, cosc, nmax, cf1, 
         else
             -j′₀/j[2]
         end
+        verbosity > 0 && @show ω
         lmul!(ω, j)
         lmul!(ω, j′)
     end

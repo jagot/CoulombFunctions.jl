@@ -27,7 +27,7 @@ and
 function lentz_thompson(b₀::T, a, b;
                         max_iter=20_000,
                         ϵ = eps(real(T)), tol=100eps(real(T)),
-                        verbosity=0) where T
+                        verbosity=0, kwargs...) where T
     small = ϵ^3
     val_or_small(x) = abs(x) < ϵ ? ϵ : x
 

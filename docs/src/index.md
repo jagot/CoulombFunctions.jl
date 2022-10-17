@@ -42,8 +42,7 @@ f_n = j_n,y_n.
 This time, we investigate a larger domain of parameters, but avoid
 smaller values of ``x`` than ``0.1`` since that does not seem to work
 in SpecialFunctions.jl (SphericalBesselFunctions.jl works at
-``x\leq0`` as well; however the combination large ``n`` and small
-``|x|`` is still problematic):
+``x\leq0`` as well):
 
 ```julia
 nx = 1001

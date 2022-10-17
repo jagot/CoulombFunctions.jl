@@ -54,9 +54,9 @@ include("reference.jl")
         @test y′ ≈ y′ref
     end
 
-    @testset "Compare with tabulated data" begin
-        j,j′,y,y′ = bessels(reference_data.z, reference_data.nℓ)
-        @test j ≈ transpose(reference_data.j)
-        @test j′ ≈ transpose(reference_data.j′)
+    @testset "Compare regular Bessel functions, with tabulated data, ℓₘₐₓ=$(rd.nℓ-1)" for rd in [bessel_reference_data_1, bessel_reference_data_2]
+        j,j′,y,y′ = bessels(rd.z, rd.nℓ)
+        @test j ≈ transpose(rd.j)
+        @test j′ ≈ transpose(rd.j′)
     end
 end

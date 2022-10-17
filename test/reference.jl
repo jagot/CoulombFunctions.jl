@@ -17,7 +17,7 @@ function bessels_ref!(j, j′, y, y′, x)
 
     j′[1] = -y[1]-j[1]/x
     y′[1] = j[1]-y[1]/x
-    
+
     for i = 2:length(j)
         n = i - 1
         ν = (n + 1)/x
@@ -26,10 +26,16 @@ function bessels_ref!(j, j′, y, y′, x)
     end
 end
 
-reference_data = let d = readdlm(joinpath(dirname(@__FILE__), "bessel-ref.txt"))
-    z = vec(d[1,:])
+function load_bessel_ref(filename)
+    d = readdlm(filename)
     nℓ = (size(d,1)-1)÷2
+
+    z = vec(d[1,:])
     j = d[1 .+ (1:nℓ),:]
     j′ = d[1 + nℓ .+ (1:nℓ),:]
-    (z=z,nℓ=nℓ,j=j,j′=j′)
+
+    (nℓ=nℓ, z=z, j=j, j′=j′)
 end
+
+bessel_reference_data_1 = load_bessel_ref(joinpath(dirname(@__FILE__), "bessel-ref.txt"))
+bessel_reference_data_2 = load_bessel_ref(joinpath(dirname(@__FILE__), "bessel-ref-L=1000.txt"))
