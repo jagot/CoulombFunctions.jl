@@ -43,13 +43,13 @@ where
 T_k(x) = \frac{2k+1}{x}.
 ```
 """
-bessel_fraction(x::T, n::Integer; kwargs...) where T =
-    lentz_thompson(n/x, k -> -one(T), k -> (2(n+k)+1)/x; kwargs...)
+bessel_fraction(x::T, n::Integer; cf_algorithm=lentz_thompson, kwargs...) where T =
+    cf_algorithm(n/x, k -> -one(T), k -> (2(n+k)+1)/x; kwargs...)
 
 # * Recurrences
 
 function bessel_downward_recurrence!(j, j′, x⁻¹::T, sinc, cosc, nmax, cf1, s;
-                                     tol=100eps(T), verbosity=0) where T
+                                     tol=100eps(T), verbosity=0, kwargs...) where T
     nj = length(j)
     if nmax > 1
         jₙ = s ? 1 : -1

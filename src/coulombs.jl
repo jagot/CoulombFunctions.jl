@@ -30,16 +30,16 @@ coulomb_normalization(η, ℓ) = 2^ℓ*exp(-π*η/2)*abs(Γ(ℓ+1+im*η))/Γ(2�
 
 # * Continued fractions
 
-coulomb_fraction1(x::T, η::T, n::Integer; kwargs...) where T =
-    lentz_thompson((n+1)/x+η/(n+1),
-                   k -> -(one(T)+η^2/(n+k)^2),
-                   k -> (2(n+1)+1)*(inv(x)+η/((n+k)^2+(n+k))); kwargs...)
+coulomb_fraction1(x::T, η::T, n::Integer; cf_algorithm=lentz_thompson, kwargs...) where T =
+    cf_algorithm((n+1)/x+η/(n+1),
+                 k -> -(one(T)+η^2/(n+k)^2),
+                 k -> (2(n+1)+1)*(inv(x)+η/((n+k)^2+(n+k))); kwargs...)
 
-function coulomb_fraction2(x::T, η::T, n::Integer, ω; kwargs...) where T
+function coulomb_fraction2(x::T, η::T, n::Integer, ω; cf_algorithm=lentz_thompson, kwargs...) where T
     imω = im*ω
-    r = lentz_thompson(x-η,
-                       k -> (imω*η - n - 1 + k)*(imω*η + n + k),
-                       k -> 2*(x - η + imω*k); kwargs...)
+    r = cf_algorithm(x-η,
+                     k -> (imω*η - n - 1 + k)*(imω*η + n + k),
+                     k -> 2*(x - η + imω*k); kwargs...)
     ((imω/x)*r[1],r[2:end]...)
 end
 
@@ -104,12 +104,14 @@ function coulombs!(F::FF, F′::FF, G::GG, G′::GG, x::T, η::T, ℓ::UnitRange
 
     verbosity > 1 && @show x, η, ℓ
     cf1,n,_,s,converged = coulomb_fraction1(x, η, ℓ[end]; verbosity=verbosity, kwargs...)
+    verbosity > 0 && @show cf1
     converged || verbosity > 0 && @warn "Consider increasing ℓmax beyond $(ℓ[end])"
 
     x⁻¹ = inv(x)
     coulomb_downward_recurrence!(F, F′, x⁻¹, η, ℓ, cf1, s)
 
     cf2,n,_,s,converged = coulomb_fraction2(x, η, ℓ[1], 1; verbosity=verbosity, kwargs...)
+    verbosity > 0 && @show cf2
 
     p,q = real(cf2),imag(cf2)
     Fₘ = F[1]
