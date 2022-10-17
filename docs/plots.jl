@@ -132,23 +132,26 @@ function accuracy()
             loglog(x, jerror, rasterized=true)
             ylim(max(1e-19,minimum(jerror)), max(maximum(jerror),1e-4))
             title("Difference")
+            ylabel(L"\Delta")
             axes_labels_opposite(:y)
         end
         csubplot(m,n,ks[2,3],nox=true) do
             j′error = abs.(j′-j′ref)
             loglog(x, j′error, rasterized=true)
             ylim(max(1e-19,minimum(j′error)), max(maximum(j′error),1e-4))
+            ylabel(L"\Delta")
             axes_labels_opposite(:y)
         end
         csubplot(m,n,ks[3,3],nox=true) do
             yerror = abs.(y-yref)
-            loglog(x, yerror, rasterized=true)
-            ylim(max(1e-19,minimum(yerror)), max(maximum(yerror),1e-4))
+            semilogx(x, log10.(yerror), rasterized=true)
+            ylabel(L"\log_{10}(\Delta)")
             axes_labels_opposite(:y)
         end
         csubplot(m,n,ks[4,3]) do
-            loglog(x, abs.(y′-y′ref), rasterized=true)
+            semilogx(x, log10.(abs.(y′-y′ref)), rasterized=true)
             xlabel(L"x")
+            ylabel(L"\log_{10}(\Delta)")
             axes_labels_opposite(:y)
         end
     end
