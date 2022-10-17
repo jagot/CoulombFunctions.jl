@@ -53,4 +53,10 @@ include("reference.jl")
         @test y ≈ yref
         @test y′ ≈ y′ref
     end
+
+    @testset "Compare with tabulated data" begin
+        j,j′,y,y′ = bessels(reference_data.z, reference_data.nℓ)
+        @test j ≈ transpose(reference_data.j)
+        @test j′ ≈ transpose(reference_data.j′)
+    end
 end

@@ -1,6 +1,8 @@
 using SpecialFunctions
 using LinearAlgebra
 
+using DelimitedFiles
+
 function bessels_ref!(j, j′, y, y′, x)
     for i = 1:length(j)
         n = i - 1
@@ -22,4 +24,12 @@ function bessels_ref!(j, j′, y, y′, x)
         j′[i] = j[i-1] - ν*j[i]
         y′[i] = y[i-1] - ν*y[i]
     end
+end
+
+reference_data = let d = readdlm(joinpath(dirname(@__FILE__), "bessel-ref.txt"))
+    z = vec(d[1,:])
+    nℓ = (size(d,1)-1)÷2
+    j = d[1 .+ (1:nℓ),:]
+    j′ = d[1 + nℓ .+ (1:nℓ),:]
+    (z=z,nℓ=nℓ,j=j,j′=j′)
 end
