@@ -18,10 +18,10 @@ The number of iterations required is roughly proportional to the
 argument of the Bessel/Coulomb function, according to Barnett (1996)
 and
 
-- Barnett, A. (1982). Continued-fraction evaluation of coulomb
-  functions ``F_\lambda(\eta, x)``, ``G\lambda(\eta, x)`` and their
+- Barnett, A. (1982). Continued-fraction evaluation of Coulomb
+  functions ``F_\lambda(\eta, x)``, ``G_\lambda(\eta, x)`` and their
   derivatives. Journal of Computational Physics, 46(2),
-  171–188. http://dx.doi.org/10.1016/0021-9991(82)90012-2
+  171–188. [10.1016/0021-9991(82)90012-2](http://dx.doi.org/10.1016/0021-9991(82)90012-2)
 
 """
 function lentz_thompson(b₀::T, a, b;
