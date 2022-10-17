@@ -43,8 +43,8 @@ where
 T_k(x) = \frac{2k+1}{x}.
 ```
 """
-bessel_fraction(x::T, n::Integer; cf_algorithm=lentz_thompson, kwargs...) where T =
-    cf_algorithm(n/x, k -> -one(T), k -> (2(n+k)+1)/x; kwargs...)
+bessel_fraction(x::T, n::Integer; cf_algorithm=lentz_thompson, max_iter=2ceil(Int, abs(x)), kwargs...) where T =
+    cf_algorithm(n/x, k -> -one(T), k -> (2(n+k)+1)/x; max_iter=max_iter, kwargs...)
 
 # * Recurrences
 
