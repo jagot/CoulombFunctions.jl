@@ -161,14 +161,14 @@ function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), verbosity=0
     reflect = x < zero(T)
     reflect && (x = -x)
 
-    cf1,_,_,s,converged = bessel_fraction(x, ℓmax; verbosity=verbosity-1, kwargs...)
+    cf1,_,_,s,converged = bessel_fraction(x, ℓmax+1; verbosity=verbosity-1, kwargs...)
     converged || verbosity > 0 && @info "Consider increasing ℓmax beyond $(ℓmax)"
 
     x⁻¹ = inv(x)
     sinx,cosx = sincos(x)
     sinc,cosc = sinx*x⁻¹,cosx*x⁻¹
 
-    bessel_downward_recurrence!(j, j′, x⁻¹, sinc, cosc, ℓmax+1, cf1, s; verbosity=verbosity-2, kwargs...)
+    bessel_downward_recurrence!(j, j′, x⁻¹, sinc, cosc, ℓmax+2, cf1, s; verbosity=verbosity-2, kwargs...)
     neumann_upward_recurrence!(y, y′, x⁻¹, sinc, cosc; kwargs...)
 
     reflect && (reflect!(j, j′); reflect!(y, y′, 1))
