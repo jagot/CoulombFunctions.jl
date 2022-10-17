@@ -1,5 +1,5 @@
 @doc raw"""
-    lentz_thompson(b₀, a, b)
+    lentz_thompson(b₀, a, b; max_iter=20_000)
 
 Lentz–Thompson algorithm for the forward evaluation of continued
 fractions:
@@ -14,14 +14,24 @@ As described in
   Coulomb Functions. In (Eds.), Computational Atomic Physics
   (pp. 181–202). Springer Berlin Heidelberg.
 
+The number of iterations required is roughly proportional to the
+argument of the Bessel/Coulomb function, according to Barnett (1996)
+and
+
+- Barnett, A. (1982). Continued-fraction evaluation of coulomb
+  functions ``F_\lambda(\eta, x)``, ``G\lambda(\eta, x)`` and their
+  derivatives. Journal of Computational Physics, 46(2),
+  171–188. http://dx.doi.org/10.1016/0021-9991(82)90012-2
+
 """
 function lentz_thompson(b₀::T, a, b;
-                        max_iter=20000,
+                        max_iter=20_000,
                         ϵ = eps(real(T)), tol=100eps(real(T)),
                         verbosity=0) where T
-    val_or_ϵ(x) = abs(x) < ϵ ? ϵ : x
+    small = ϵ^3
+    val_or_small(x) = abs(x) < ϵ ? ϵ : x
 
-    f = val_or_ϵ(b₀)
+    f = val_or_small(b₀)
     C = f
     U = promote_type(typeof(a(1)), typeof(b(1)))
     D = zero(U)
@@ -46,13 +56,13 @@ function lentz_thompson(b₀::T, a, b;
     for n = 1:max_iter
         aₙ = a(n)
         bₙ = b(n)
-        C = val_or_ϵ(bₙ + aₙ/C)
-        D = inv(val_or_ϵ(bₙ + aₙ*D))
+        C = val_or_small(bₙ + aₙ/C)
+        D = inv(val_or_small(bₙ + aₙ*D))
         if isreal(D) && D < 0
             # See section 3.2 of
             #
             # - Barnett, A., Feng, D., Steed, J., & Goldfarb, L. (1974). Coulomb
-            #   wave functions for all real $\eta$ and ρ. Computer Physics
+            #   wave functions for all real η and ρ. Computer Physics
             #   Communications, 8(5),
             #   377–395. http://dx.doi.org/10.1016/0010-4655(74)90013-7
             s = !s
@@ -68,7 +78,7 @@ function lentz_thompson(b₀::T, a, b;
             end
         end
         f = fn
-        δ < 1e-6eps(abs(f)) && return f,n,δ,s,true
+        δ < tol && return f,n,δ,s,true
     end
 
     verbosity > 0 && @warn "Lentz–Thompson did not converge in $(max_iter) iterations, |Δ-1| = $(δ)"
