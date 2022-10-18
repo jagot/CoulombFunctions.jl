@@ -98,6 +98,11 @@ include("reference.jl")
                     @test δf < tol
                     @test isconverged
                 end
+
+                @testset "Too few iterations" begin
+                    cf1,iters,δf,s,isconverged = coulomb_fraction1(1.0, -1.0, 100, cf_algorithm=alg, verbosity=4, max_iter=1)
+                    @test !isconverged
+                end
             end
             @testset "Coulomb continued fraction 2, $(label)" for (alg, label) in [(lentz_thompson, "Lentz–Thompson"),
                                                                                    (steed_kahan, "Steed–Kahan")]
@@ -118,6 +123,11 @@ include("reference.jl")
                     @test cf2 ≈ -99.98497373591508 - 3.0677993260103584e-13im
                     @test δf < tol
                     @test isconverged
+                end
+
+                @testset "Too few iterations" begin
+                    cf2,iters,δf,s,isconverged = coulomb_fraction2(1.0, -1.0, 100, 1, cf_algorithm=alg, verbosity=4, max_iter=1)
+                    @test !isconverged
                 end
             end
         end
