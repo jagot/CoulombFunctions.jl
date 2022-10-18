@@ -140,6 +140,9 @@ function coulomb_downward_recurrence!(F, F′, x⁻¹::T, η, ℓ::UnitRange, cf
         Fₙ₋₁ = (S*Fₙ + F′ₙ)/R
         F′ₙ₋₁ = S*Fₙ₋₁ - R*Fₙ
 
+        F[i] = Fₙ
+        F′[i] = F′ₙ
+
         if abs(Fₙ₋₁) > large
             verbosity > 1 && @info "Coulomb downward recurrence larger than $(large), renormalizing" n Fₙ₋₁ F′ₙ₋₁
             iF = inv(Fₙ₋₁)
@@ -149,8 +152,6 @@ function coulomb_downward_recurrence!(F, F′, x⁻¹::T, η, ℓ::UnitRange, cf
             lmul!(iF, view(F′, i:nF))
         end
 
-        F[i] = Fₙ
-        F′[i] = F′ₙ
         Fₙ = Fₙ₋₁
         F′ₙ = F′ₙ₋₁
     end
