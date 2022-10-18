@@ -52,6 +52,47 @@ function simple_example()
     savefig(joinpath(FIGDIR, "simple-example.svg"))
 end
 
+function simple_coulomb_example()
+    nx = 1000
+    x = range(0.0, stop=20, length=nx)
+
+    nℓ = 10
+    η = -1.0
+    F, F′, G, G′ = coulombs(x, η, nℓ)
+
+    cfigure("simple coulomb example",figsize=(7,6)) do
+        csubplot(221,nox=true) do
+            plot(x, F)
+            margins(0, 0.1)
+            ylim(-2.0, 2.0)
+            ylabel(L"F_\lambda(\eta,x)")
+        end
+        csubplot(222,nox=true) do
+            plot(x, G)
+            margins(0, 0.1)
+            ylim(-2.0, 2.0)
+            ylabel(L"G_\lambda(\eta,x)")
+            axes_labels_opposite(:y)
+        end
+        csubplot(223) do
+            plot(x, F′)
+            margins(0, 0.1)
+            ylim(-2.0, 2.0)
+            xlabel(L"x")
+            ylabel(L"F'_\lambda(\eta,x)")
+        end
+        csubplot(224) do
+            plot(x, G′)
+            margins(0, 0.1)
+            ylim(-2.0, 2.0)
+            xlabel(L"x")
+            ylabel(L"G'_\lambda(\eta,x)")
+            axes_labels_opposite(:y)
+        end
+    end
+    savefig(joinpath(FIGDIR, "simple-coulomb-example.svg"))
+end
+
 function accuracy()
     nx = 1001
     x = 10 .^ range(-1, stop=4, length=nx)
@@ -226,5 +267,6 @@ end
 @info "Documentation plots"
 mkpath(FIGDIR)
 @echo simple_example()
+@echo simple_coulomb_example()
 @echo accuracy()
 @echo continued_fractions()

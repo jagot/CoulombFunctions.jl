@@ -36,7 +36,16 @@ nℓ = 10
 j, j′, y, y′ = bessels(x, nℓ)
 ```
 
-![Simple example](figures/simple-example.svg)
+![Simple Bessel example](figures/simple-example.svg)
+
+```julia
+x = range(0, stop=12, length=1000)
+nℓ = 10
+η = -1.0
+F, F′, G, G′ = coulombs(x, η, nℓ)
+```
+
+![Simple Coulomb example](figures/simple-coulomb-example.svg)
 
 ## Accuracy
 
