@@ -40,26 +40,39 @@ coulomb_fraction1(x::T, η::T, n::Integer; cf_algorithm=lentz_thompson,
                  k -> -cf1R²(n+k,η),
                  k -> cf1T(n+k,η,x); max_iter=max_iter, kwargs...)
 
-function coulomb_fraction2(x::T, η::T, n::Integer, ω; cf_algorithm=lentz_thompson, kwargs...) where T
+function coulomb_fraction2(x::T, η::T, n::Integer, ω; cf_algorithm=lentz_thompson,
+                           max_iter=max(1000, 2ceil(Int, 5000/abs(x))), kwargs...) where T
     imω = im*ω
     r = cf_algorithm(x-η,
                      k -> (imω*η - n - 1 + k)*(imω*η + n + k),
-                     k -> 2*(x - η + imω*k); kwargs...)
+                     k -> 2*(x - η + imω*k); max_iter=max_iter, kwargs...)
     ((imω/x)*r[1],r[2:end]...)
 end
 
 # * Recurrences
 
-function coulomb_downward_recurrence!(F, F′, x⁻¹::T, η, ℓ::UnitRange, cf1, s) where T
+function coulomb_downward_recurrence!(F, F′, x⁻¹::T, η, ℓ::UnitRange, cf1, s; verbosity=0,
+                                      large=∛(floatmax(real(T))), kwargs...) where T
     Fₙ = s ? 1 : -1
     F′ₙ = cf1*Fₙ
     η² = η^2
-    for (i,n) in zip(reverse(eachindex(ℓ)), reverse(ℓ))
+    nF = length(F)
+    for i = nF:-1:1
+        n = ℓ[i]
         S = n*x⁻¹ + η/n
         R = √(1 + η²/n^2)
 
         Fₙ₋₁ = (S*Fₙ + F′ₙ)/R
         F′ₙ₋₁ = S*Fₙ₋₁ - R*Fₙ
+
+        if abs(Fₙ₋₁) > large
+            verbosity > 1 && @info "Coulomb downward recurrence larger than $(large), renormalizing" n Fₙ₋₁ F′ₙ₋₁
+            iF = inv(Fₙ₋₁)
+            Fₙ₋₁ = one(Fₙ₋₁)
+            F′ₙ₋₁ *= iF
+            lmul!(iF, view(F, i:nF))
+            lmul!(iF, view(F′, i:nF))
+        end
 
         F[i] = Fₙ
         F′[i] = F′ₙ
@@ -113,7 +126,7 @@ function coulombs!(F::FF, F′::FF, G::GG, G′::GG, x::T, η::T, ℓ::UnitRange
     converged || verbosity > 0 && @warn "Consider increasing ℓmax beyond $(ℓ[end])"
 
     x⁻¹ = inv(x)
-    coulomb_downward_recurrence!(F, F′, x⁻¹, η, ℓ, cf1, s)
+    coulomb_downward_recurrence!(F, F′, x⁻¹, η, ℓ, cf1, s; verbosity=verbosity-2, kwargs...)
 
     cf2,n,_,s,converged = coulomb_fraction2(x, η, ℓ[1], 1; verbosity=verbosity, kwargs...)
     verbosity > 0 && @show cf2
@@ -125,6 +138,7 @@ function coulombs!(F::FF, F′::FF, G::GG, G′::GG, x::T, η::T, ℓ::UnitRange
     G′ₘ = p*Gₘ - q*Fₘ
 
     ω₁ = 1/√(F′ₘ*Gₘ - Fₘ*G′ₘ)
+    verbosity > 0 && @show ω₁
 
     lmul!(ω₁, F)
     lmul!(ω₁, F′)
