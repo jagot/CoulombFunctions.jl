@@ -15,7 +15,7 @@ See Eq. (2) of
 - Barnett, A. (1982). COULFG: Coulomb and Bessel Functions and Their
   Derivatives, for Real Arguments, by Steed's Method. Computer Physics
   Communications, 27(2),
-  147–166. http://dx.doi.org/10.1016/0010-4655(82)90070-4
+  147–166. [10.1016/0010-4655(82)90070-4](http://dx.doi.org/10.1016/0010-4655(82)90070-4)
 
 or
 
