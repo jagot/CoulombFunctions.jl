@@ -104,6 +104,7 @@ include("reference.jl")
                     @test !isconverged
                 end
             end
+
             @testset "Coulomb continued fraction 2, $(label)" for (alg, label) in [(lentz_thompson, "Lentz–Thompson"),
                                                                                    (steed_kahan, "Steed–Kahan")]
                 tol = √(eps())
@@ -130,6 +131,14 @@ include("reference.jl")
                     @test !isconverged
                 end
             end
+        end
+
+        @testset "Accuracy" begin
+            compare_with_coulomb_reference("attractive", range(0.01, stop=20, length=1000), -1.0, 0:9)
+            compare_with_coulomb_reference("attractive-large", 10.0 .^ range(-3, stop=3, length=30), -1.0, 0:999)
+            compare_with_coulomb_reference("attractive-non-integer-ell", range(0.01, stop=20, length=1000), -1.0, UnitRange(0.334, 5.334))
+            compare_with_coulomb_reference("repulsive", range(0.1, stop=20, length=1000), 1.0, UnitRange(-2.1,-0.1))
+
         end
     end
 end

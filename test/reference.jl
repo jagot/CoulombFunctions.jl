@@ -26,8 +26,11 @@ function bessels_ref!(j, j′, y, y′, x)
     end
 end
 
-function load_bessel_ref(filename)
-    d = readdlm(filename)
+ref_file(name) = joinpath(dirname(@__FILE__), name*".txt")
+load_ref(name) = readdlm(ref_file(name))
+
+function load_bessel_ref(name)
+    d = load_ref(name)
     nℓ = (size(d,1)-1)÷2
 
     z = vec(d[1,:])
@@ -37,8 +40,29 @@ function load_bessel_ref(filename)
     (nℓ=nℓ, z=z, j=j, j′=j′)
 end
 
-bessel_reference_data_1 = load_bessel_ref(joinpath(dirname(@__FILE__), "bessel-ref.txt"))
-bessel_reference_data_2 = load_bessel_ref(joinpath(dirname(@__FILE__), "bessel-ref-L=1000.txt"))
+bessel_reference_data_1 = load_bessel_ref("bessel-ref")
+bessel_reference_data_2 = load_bessel_ref("bessel-ref-L=1000")
 
-load_cf_ref(name, sizes...) =
-    reshape(readdlm(joinpath(dirname(@__FILE__), name*".txt")), sizes...)
+load_cf_ref(name, sizes...) = reshape(load_ref(name), sizes...)
+
+function compare_with_coulomb_reference(name, x, η, ℓs)
+    @testset "Coulomb accuracy $(name)" begin
+        f_ref = load_ref("coulomb-ref-"*name*"-f")
+        f′_ref = load_ref("coulomb-ref-"*name*"-fprime")
+        if isfile("coulomb-ref-"*name*"-g")
+            g_ref = load_ref("coulomb-ref-"*name*"-g")
+            g′_ref = load_ref("coulomb-ref-"*name*"-gprime")
+            f,f′,g,g′ = coulombs(x, η, ℓs)
+
+            @test f ≈ f_ref
+            @test f′ ≈ f′_ref
+            @test g ≈ g_ref
+            @test g′ ≈ g′_ref
+        else
+            f,f′ = coulombFs(x, η, ℓs)
+
+            @test f ≈ f_ref
+            @test f′ ≈ f′_ref
+        end
+    end
+end

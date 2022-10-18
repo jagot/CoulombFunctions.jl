@@ -179,14 +179,14 @@ function coulomb_upward_recurrence!(G, G′, x⁻¹::T, η, ℓ::UnitRange) wher
     Gₙ = G[1]
     G′ₙ = G′[1]
     η² = η^2
-    for i = 2:length(ℓ)
+    for i = 1:length(ℓ)-1
         n = ℓ[i]
 
         S = (n+1)*x⁻¹ + η/(n+1)
         R = √(1 + η²/(n+1)^2)
 
-        G[i] = Gₙ₊₁ = (S*Gₙ - G′ₙ)/R
-        G′[i] = G′ₙ₊₁ = R*Gₙ - S*Gₙ₊₁
+        G[i+1] = Gₙ₊₁ = (S*Gₙ - G′ₙ)/R
+        G′[i+1] = G′ₙ₊₁ = R*Gₙ - S*Gₙ₊₁
 
         Gₙ = Gₙ₊₁
         G′ₙ = G′ₙ₊₁
@@ -197,6 +197,15 @@ coulomb_upward_recurrence!(::Nothing, ::Nothing, args...; _...) = nothing
 
 # * Driver
 
+"""
+    coulombs!(F, F′, G, G′, x, η, ℓ)
+
+Main routine that computes the continued fractions and the recurrence
+relations to generate the regular functions ``F_\ell(\eta,x)`` and
+``F_\ell'(\eta,x)`` and the irregular functions ``G_\ell(\eta,x)`` and
+``G_\ell'(\eta,x)`` (computation of the latter can be elided by
+passing `nothing` for `G` and `G′`).
+"""
 function coulombs!(F::FF, F′::FF, G::GG, G′::GG, x::T, η::T, ℓ::UnitRange; verbosity=0, kwargs...) where {FF,GG,T<:Number}
     verbose = get(kwargs, :verbose, false)
     ρtp = turning_point(η, first(ℓ))
@@ -240,6 +249,8 @@ function coulombs!(F::FF, F′::FF, G::GG, G′::GG, x::T, η::T, ℓ::UnitRange
     if !isnothing(G)
         G[1] = ω₁*Gₘ
         G′[1] = ω₁*G′ₘ
+
+        verbosity > 0 && @show F[1] F′[1] G[1] G′[1]
 
         coulomb_upward_recurrence!(G, G′, x⁻¹, η, ℓ)
     end
@@ -322,6 +333,9 @@ function coulombs(x::AbstractVector{T}, η::T, ℓ::AbstractVector; kwargs...) w
     F, F′, G, G′
 end
 
+coulombs(r::AbstractVector, Z::Number, k::Number, ℓ::AbstractVector; kwargs...) =
+    coulombs(k*r, -Z/k, ℓ; kwargs...)
+
 """
     coulombs(r, Z, k::AbstractVector, ℓ; kwargs...)
 
@@ -345,4 +359,24 @@ coulombs(x, η, nℓ::Integer; kwargs...) =
 coulombs(r, Z, k, nℓ::Integer; kwargs...) =
     coulombs(r, Z, k, 0:nℓ-1; kwargs...)
 
-export coulombs!, coulombs
+@doc raw"""
+    coulombFs(x::AbstractVector, η, ℓ; kwargs...)
+
+Convenience wrapper around [`coulombs!`](@ref) that preallocates
+output matrices of the appropriate dimensions, only computing the
+regular functions ``F_\ell(\eta,x)`` and ``F_\ell'(\eta,x)``.
+"""
+function coulombFs(x::AbstractVector{T}, η::T, ℓ::AbstractVector; kwargs...) where T
+    nx = length(x)
+    nℓ = length(ℓ)
+    F = zeros(T, nx, nℓ)
+    F′ = zeros(T, nx, nℓ)
+    for (i,x) in enumerate(x)
+        coulombs!(view(F, i, :), view(F′, i, :),
+                  nothing, nothing,
+                  x, η, ℓ; kwargs...)
+    end
+    F, F′
+end
+
+export coulombs!, coulombs, coulombFs

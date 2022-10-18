@@ -2,6 +2,7 @@
 
 ```@docs
 coulombs
+coulombFs
 coulombs!
 SphericalBesselFunctions.coulomb_fraction1
 SphericalBesselFunctions.coulomb_fraction2
