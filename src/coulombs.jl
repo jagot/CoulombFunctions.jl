@@ -63,7 +63,7 @@ T_k(\eta,x) &= S_k(\eta,x) + S_{k+1}(\eta,x) = (2k+1)\left(\frac{1}{x} + \frac{\
 \end{aligned}
 ```
 """
-coulomb_fraction1(x::T, η::T, n::Integer; cf_algorithm=lentz_thompson,
+coulomb_fraction1(x::T, η::T, n; cf_algorithm=lentz_thompson,
                   max_iter=1000 + max(1, 5ceil(Int, √(abs(x^2-2η*x)))), kwargs...) where T =
     cf_algorithm(cf1S(n+1,η,x),
                  k -> -cf1R²(n+k,η),
@@ -93,7 +93,7 @@ c &= -n + \mathrm{i}\omega\eta.
 \end{aligned}
 ```
 """
-function coulomb_fraction2(x::T, η::T, n::Integer, ω; cf_algorithm=lentz_thompson,
+function coulomb_fraction2(x::T, η::T, n, ω; cf_algorithm=lentz_thompson,
                            max_iter=max(1000, 2ceil(Int, 5000/abs(x))), kwargs...) where T
     imω = im*ω
     r = cf_algorithm(x-η,

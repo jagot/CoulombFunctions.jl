@@ -39,3 +39,6 @@ end
 
 bessel_reference_data_1 = load_bessel_ref(joinpath(dirname(@__FILE__), "bessel-ref.txt"))
 bessel_reference_data_2 = load_bessel_ref(joinpath(dirname(@__FILE__), "bessel-ref-L=1000.txt"))
+
+load_cf_ref(name, sizes...) =
+    reshape(readdlm(joinpath(dirname(@__FILE__), name*".txt")), sizes...)

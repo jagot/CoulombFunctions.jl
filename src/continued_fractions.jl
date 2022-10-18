@@ -137,9 +137,9 @@ function steed_kahan(b₀::T, a, b;
                        "n", "a", "b", "h", "D", "δh")
             FormatExpr("{1:>4d} {2:10.3e} {3:10.3e} {4:10.3e} {5:10.3e} {6:10.3e}")
         else
-            # printfmtln("{1:>4s} {2:>10s} {3:>10s} {4:>10s} {5:>10s} {6:>10s} {7:>10s} {8:>10s} {9:>10s} {10:>10s} {11:>10s} {12:>10s} {13:>10s} {14:>10s}",
-            #            "n", "Re(a)", "Im(a)", "Re(b)", "Im(b)", "Re(C)", "Im(C)", "Re(D)", "Im(D)", "|Δ-1|", "Re(f)", "Im(f)", "Re(δf)", "Im(δf)")
-            # FormatExpr("{1:>4d} {2:10.3e} {3:10.3e} {4:10.3e} {5:10.3e} {6:10.3e} {7:10.3e} {8:10.3e} {9:10.3e} {10:10.3e} {11:10.3e} {12:10.3e} {13:10.3e} {14:10.3e}")
+            printfmtln("{1:>4s} {2:>10s} {3:>10s} {4:>10s} {5:>10s} {6:>10s} {7:>10s} {8:>10s} {9:>10s} {10:>10s}",
+                       "n", "Re(a)", "Im(a)", "Re(b)", "Im(b)", "Re(h)", "Im(h)", "Re(D)", "Im(D)", "|δh|")
+            FormatExpr("{1:>4d} {2:10.3e} {3:10.3e} {4:10.3e} {5:10.3e} {6:10.3e} {7:10.3e} {8:10.3e} {9:10.3e} {10:10.3e}")
         end
     else
         nothing
@@ -157,7 +157,7 @@ function steed_kahan(b₀::T, a, b;
             # See section 3.2 of
             #
             # - Barnett, A., Feng, D., Steed, J., & Goldfarb, L. (1974). Coulomb
-            #   wave functions for all real $\eta$ and ρ. Computer Physics
+            #   wave functions for all real η and ρ. Computer Physics
             #   Communications, 8(5),
             #   377–395. http://dx.doi.org/10.1016/0010-4655(74)90013-7
             s = !s
@@ -165,13 +165,13 @@ function steed_kahan(b₀::T, a, b;
         if verbosity>1
             if U <: Real
                 printfmtln(fmt, n, aₙ, bₙ, h, D, δh)
-            # else
-            #     printfmtln(fmt, n, real(aₙ), imag(aₙ), real(bₙ), imag(bₙ), real(C), imag(C), real(D), imag(D), δ, real(fn), imag(fn), real(fn-f), imag(fn-f))
+            else
+                printfmtln(fmt, n, real(aₙ), imag(aₙ), real(bₙ), imag(bₙ), real(h), imag(h), real(D), imag(D), abs(δh))
             end
         end
-        abs(δh) < 1e-6eps(abs(h)) && return h,n,δh,s,true
+        abs(δh) < tol && return h,n,abs(δh),s,true
     end
 
     verbosity > 0 && @warn "Steed–Kahan did not converge in $(max_iter) iterations, δh = $(δh)"
-    h,max_iter,δh,s,false
+    h,max_iter,abs(δh),s,false
 end
