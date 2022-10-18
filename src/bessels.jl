@@ -49,6 +49,38 @@ bessel_fraction(x::T, n::Integer; cf_algorithm=lentz_thompson,
 
 # * Recurrences
 
+@doc raw"""
+    bessel_downward_recurrence!(j, j′, x⁻¹, sinc, cosc, nmax, cf1, s; large)
+
+Given the logarithmic derivative `cf1=j′[end]/j[end]` (computed using
+[`bessel_fraction`](@ref)), and the sign `s`, fill in all lower orders
+using the _downward recurrence_
+```math
+\begin{aligned}
+g_{n-1} &= S_{n+1} g_n + g_n', &
+g_{n-1}' &= S_{n-1} g_{n-1} - g_n, &
+S_n &= \frac{n}{x},
+\end{aligned}
+```
+and normalize the whole series using the [analytically known
+expressions](https://dlmf.nist.gov/10.49)
+```math
+\tag{DLMF10.49.3}
+\begin{aligned}
+j_0(z) &= \frac{\sin z}{z}, &
+j_0'(z) &= \frac{\cos z}{z} - \frac{\sin z}{z^2}.
+\end{aligned}
+```
+
+If at any point during the recurrence, `j[i]>large`, renormalize
+`j′[i:end] ./= j[i]` and `j[i:end] ./= j[i]` to avoid overflow, and
+the continue the recurrence. This is very useful for small ``|x|`` and
+large ``n``.
+
+`nmax` allows starting the recurrence for a higher ``n`` than for
+which there is space allocated in `j` and `j′` (this can help
+convergence for the terms which are actually of interest).
+"""
 function bessel_downward_recurrence!(j, j′, x⁻¹::T, sinc, cosc, nmax, cf1, s;
                                      tol=100eps(T), verbosity=0, large=∛(floatmax(real(T))), kwargs...) where T
     verbosity > 0 && @show x⁻¹, sinc, cosc, nmax, cf1, s
@@ -103,6 +135,27 @@ end
 
 bessel_downward_recurrence!(::Nothing, args...; _...) = nothing
 
+@doc raw"""
+    neumann_upward_recurrence(y, y′, x⁻¹, sinc, cosc)
+
+Generate the irregular Neumann functions using (stable) upward
+recurrence
+```math
+\begin{aligned}
+g_{n+1} &= S_n g_n - g_n', &
+g_{n+1}' &= g_n - S_{n+2} g_{n+1},
+\end{aligned}
+```
+starting from the [analytically known
+expressions](https://dlmf.nist.gov/10.49)
+```math
+\tag{DLMF10.49.5}
+\begin{aligned}
+y_0(z) &= -\frac{\cos z}{z}, &
+y_0'(z) &= \frac{\sin z}{z} + \frac{\cos z}{z^2}.
+\end{aligned}
+```
+"""
 function neumann_upward_recurrence!(y, y′, x⁻¹::T, sinc, cosc; _...) where T
     y[1] = -cosc
     y′[1] = sinc + cosc*x⁻¹

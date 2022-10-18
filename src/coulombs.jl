@@ -25,7 +25,16 @@ or
 """
 turning_point(η, ℓ) = η + √(η^2 + ℓ*(ℓ+1))
 
-# https://dlmf.nist.gov/33.2
+@doc raw"""
+    coulomb_normalization(η, ℓ)
+
+Compute the Coulombic [normalization constant](https://dlmf.nist.gov/33.2#ii)
+```math
+\tag{DLMF33.2.5}
+C_\ell(\eta) =
+\frac{2^\ell \mathrm{e}^{-\pi\eta/2}|\Gamma(\ell+1+\mathrm{i}\eta)|}{\Gamma(2\ell+2)}.
+```
+"""
 coulomb_normalization(η, ℓ) = 2^ℓ*exp(-π*η/2)*abs(Γ(ℓ+1+im*η))/Γ(2ℓ+2)
 
 # * Continued fractions
@@ -68,7 +77,7 @@ Hankel function ``H^\omega_\lambda(\eta,x) = G_\lambda(\eta,x) +
 \mathrm{i}\omega F_\lambda(\eta,x)``
 
 ```math
-\frac{H^{\omega'}_n(\eta,x)}{H^\omega_n(\eta,x)} =
+\frac{{H^{\omega}_n}'(\eta,x)}{H^\omega_n(\eta,x)} =
 p+\mathrm{i}q =
 \mathrm{i}\omega\left(1-\frac{\eta}{x}\right) +
 \frac{\mathrm{i}\omega}{x}
@@ -95,6 +104,28 @@ end
 
 # * Recurrences
 
+@doc raw"""
+    coulomb_downward_recurrence!(F, F′, x⁻¹, η, ℓ, cf1, s; large)
+
+Given the logarithmic derivative `cf1=F′[end]/F[end]` (computed using
+[`coulomb_fraction1`](@ref)), and the sign `s`, fill in all lower orders
+using the _downward recurrence_
+```math
+\begin{aligned}
+w_{n-1} &=
+(S_n w_n + w_n')/R_n, &
+w_{n-1}' &=
+S_nw_{n-1} - R_n w_n, \\
+R_k &= \sqrt{1 + \frac{\eta^2}{k^2}}, &
+S_k &= \frac{k}{x} + \frac{\eta}{k}.
+\end{aligned}
+```
+
+If at any point during the recurrence, `F[i]>large`, renormalize
+`F′[i:end] ./= F[i]` and `F[i:end] ./= F[i]` to avoid overflow, and
+the continue the recurrence. This is very useful for small ``|x|`` and
+large ``\ell``.
+"""
 function coulomb_downward_recurrence!(F, F′, x⁻¹::T, η, ℓ::UnitRange, cf1, s; verbosity=0,
                                       large=∛(floatmax(real(T))), kwargs...) where T
     Fₙ = s ? 1 : -1
@@ -125,6 +156,24 @@ function coulomb_downward_recurrence!(F, F′, x⁻¹::T, η, ℓ::UnitRange, cf
     end
 end
 
+@doc raw"""
+    coulomb_upward_recurrence(G, G′, x⁻¹, η, ℓ)
+
+Generate the irregular Coulomb functions using (stable) upward
+recurrence
+```math
+\begin{aligned}
+w_{n+1} &= (S_{n+1} w_n - w_n')/R_{n+1}, &
+w_{n+1}' &= R_{n+1}w_n - S_{n+1} w_{n+1},
+\end{aligned}
+```
+starting from `G[1]` and `G′[1]`, which we find using the Wronskian
+```math
+F_\lambda'(\eta,z)G_\lambda(\eta,z) - F_\lambda(\eta,z)G_\lambda'(\eta,z) = 1
+```
+and the logarithmic derivative of ``G_\lambda(\eta,z) +
+\mathrm{i}F_\lambda(\eta,z)`` (see [`coulomb_fraction2`](@ref)).
+"""
 function coulomb_upward_recurrence!(G, G′, x⁻¹::T, η, ℓ::UnitRange) where T
     Gₙ = G[1]
     G′ₙ = G′[1]
@@ -292,7 +341,7 @@ end
 coulombs(x, η, nℓ::Integer; kwargs...) =
     coulombs(x, η, 0:nℓ-1; kwargs...)
 
-coulombs(x, Z, k, nℓ::Integer; kwargs...) =
-    coulombs(x, Z, k, 0:nℓ-1; kwargs...)
+coulombs(r, Z, k, nℓ::Integer; kwargs...) =
+    coulombs(r, Z, k, 0:nℓ-1; kwargs...)
 
 export coulombs!, coulombs

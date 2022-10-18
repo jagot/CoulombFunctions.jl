@@ -11,6 +11,9 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Spherical Bessel Functions" => "spherical_bessel_functions.md",
+        "Coulomb Functions" => "coulomb_functions.md",
+        "Continued Fractions" => "continued_fractions.md",
     ],
     repo="https://github.com/jagot/SphericalBesselFunctions.jl/blob/{commit}{path}#L{line}",
     sitename="SphericalBesselFunctions.jl",

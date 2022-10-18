@@ -15,8 +15,9 @@ As described in
   (pp. 181–202). Springer Berlin Heidelberg.
 
 The number of iterations required is roughly proportional to the
-argument of the Bessel/Coulomb function, according to Barnett (1996)
-and
+argument of the Bessel, according to Barnett (1996). For the Coulomb
+functions, the number of iterations required is a bit more involved,
+see
 
 - Barnett, A. (1982). Continued-fraction evaluation of Coulomb
   functions ``F_\lambda(\eta, x)``, ``G_\lambda(\eta, x)`` and their
@@ -114,7 +115,7 @@ As described in
 
 - Thompson, I., & Barnett, A. (1986). Coulomb and Bessel functions of
   complex arguments and order. Journal of Computational Physics,
-  64(2), 490–509. http://dx.doi.org/10.1016/0021-9991(86)90046-x
+  64(2), 490–509. [10.1016/0021-9991(86)90046-x](http://dx.doi.org/10.1016/0021-9991(86)90046-x)
 
 """
 function steed_kahan(b₀::T, a, b;
