@@ -43,21 +43,23 @@ where
 T_k(x) = \frac{2k+1}{x}.
 ```
 """
-bessel_fraction(x::T, n::Integer; cf_algorithm=lentz_thompson, max_iter=2ceil(Int, abs(x)), kwargs...) where T =
+bessel_fraction(x::T, n::Integer; cf_algorithm=lentz_thompson,
+                max_iter=max(1000, 2ceil(Int, abs(x))), kwargs...) where T =
     cf_algorithm(n/x, k -> -one(T), k -> (2(n+k)+1)/x; max_iter=max_iter, kwargs...)
 
 # * Recurrences
 
 function bessel_downward_recurrence!(j, j′, x⁻¹::T, sinc, cosc, nmax, cf1, s;
-                                     tol=100eps(T), verbosity=0, large=1e100, kwargs...) where T
+                                     tol=100eps(T), verbosity=0, large=∛(floatmax(real(T))), kwargs...) where T
     verbosity > 0 && @show x⁻¹, sinc, cosc, nmax, cf1, s
     nj = length(j)
+    nj == 0 && return
     if nmax > 1
         jₙ = s ? 1 : -1
         j′ₙ = cf1*jₙ
 
         S = (nmax-1)*x⁻¹
-        for n = nmax:-1:2
+        @inbounds for n = nmax:-1:2
             jₙ₋₁ = (S+x⁻¹)*jₙ + j′ₙ
             S -= x⁻¹
             j′ₙ₋₁ = S*jₙ₋₁ - jₙ
@@ -83,7 +85,7 @@ function bessel_downward_recurrence!(j, j′, x⁻¹::T, sinc, cosc, nmax, cf1, 
 
     j′₀ = cosc - sinc*x⁻¹
 
-    if nj > 1
+    @inbounds if nj > 1
         verbosity > 0 && @show sinc
         ω = if abs(sinc) > 1e-1 # √(tol)
             sinc/j[1]
@@ -106,7 +108,7 @@ function neumann_upward_recurrence!(y, y′, x⁻¹::T, sinc, cosc; _...) where 
     y′[1] = sinc + cosc*x⁻¹
 
     S = zero(T)
-    for n = 2:length(y)
+    @inbounds for n = 2:length(y)
         y[n] = S*y[n-1] - y′[n-1]
         S += x⁻¹
         y′[n] = y[n-1] - (S+x⁻¹)*y[n]
