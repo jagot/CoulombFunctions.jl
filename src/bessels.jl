@@ -31,12 +31,12 @@ end
 @doc raw"""
     bessel_fraction(x, n)
 
-Evaluated the continued fraction for the spherical Bessel function
+Evaluate the continued fraction for the spherical Bessel function
 
 ```math
 \frac{j'_n(x)}{j_n(x)} =
 \frac{n}{x} -
-\frac{1}{T_{n+1}(x)-}\frac{1}{T_{n+2}(x)-}...\frac{1}{T_k-...},
+\frac{1}{T_{n+1}(x)-}\frac{1}{T_{n+2}(x)-}...\frac{1}{T_k(x)-...},
 ```
 where
 ```math

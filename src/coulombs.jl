@@ -34,12 +34,56 @@ cf1R²(k,η) = 1 + η^2/k^2
 cf1S(k,η,x) = k/x + η/k
 cf1T(k,η,x) = (2k+1)*(inv(x) + η/(k^2 + k))
 
+@doc raw"""
+    coulomb_fraction1(x, η, n)
+
+Evaluate the continued fraction for the logarithmic derivative of the
+Coulomb function
+
+```math
+\frac{F'_n(\eta,x)}{F_n(\eta,x)} =
+S_{n+1}(\eta,x) -
+\frac{R_{n+1}^2(\eta)}{T_{n+1}(\eta,x)-}\frac{R_{n+2}^2(\eta)}{T_{n+2}(\eta,x)-}...\frac{R_k^2(\eta)}{T_k(\eta,x)-...},
+```
+where
+```math
+\begin{aligned}
+R_k(\eta) &= \sqrt{1+\frac{\eta^2}{k^2}}, \qquad
+S_k(\eta,x) = \frac{k}{x} + \frac{\eta}{k}, \\
+T_k(\eta,x) &= S_k(\eta,x) + S_{k+1}(\eta,x) = (2k+1)\left(\frac{1}{x} + \frac{\eta}{k^2+k}\right).
+\end{aligned}
+```
+"""
 coulomb_fraction1(x::T, η::T, n::Integer; cf_algorithm=lentz_thompson,
                   max_iter=1000 + max(1, 5ceil(Int, √(abs(x^2-2η*x)))), kwargs...) where T =
     cf_algorithm(cf1S(n+1,η,x),
                  k -> -cf1R²(n+k,η),
                  k -> cf1T(n+k,η,x); max_iter=max_iter, kwargs...)
 
+@doc raw"""
+    coulomb_fraction2(x, η, n, ω)
+
+Evaluate the continued fraction for the logarithmic derivative of the
+Hankel function ``H^\omega_\lambda(\eta,x) = G_\lambda(\eta,x) +
+\mathrm{i}\omega F_\lambda(\eta,x)``
+
+```math
+\frac{H^{\omega'}_n(\eta,x)}{H^\omega_n(\eta,x)} =
+p+\mathrm{i}q =
+\mathrm{i}\omega\left(1-\frac{\eta}{x}\right) +
+\frac{\mathrm{i}\omega}{x}
+\frac{ac}{2(x-\eta+\mathrm{i}\omega)+}
+\frac{(a+1)(c+1)}{2(x-\eta+2\mathrm{i}\omega)+...},
+```
+where
+```math
+\begin{aligned}
+a &= 1+n+\mathrm{i}\omega\eta, &
+b &= 2n + 2, &
+c &= -n + \mathrm{i}\omega\eta.
+\end{aligned}
+```
+"""
 function coulomb_fraction2(x::T, η::T, n::Integer, ω; cf_algorithm=lentz_thompson,
                            max_iter=max(1000, 2ceil(Int, 5000/abs(x))), kwargs...) where T
     imω = im*ω
