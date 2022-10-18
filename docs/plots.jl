@@ -7,8 +7,10 @@ Cycler = pyimport("cycler")
 plt.rc("axes", prop_cycle=plt.rcParams["axes.prop_cycle"])
 
 using SphericalBesselFunctions
+import SphericalBesselFunctions: bessel_fraction, coulomb_fraction1, coulomb_fraction2
 
 include(joinpath(@__DIR__, "../test/reference.jl"))
+FIGDIR = joinpath(@__DIR__, "src", "figures")
 
 function simple_example()
     nx = 1000
@@ -47,7 +49,7 @@ function simple_example()
             axes_labels_opposite(:y)
         end
     end
-    savefig("docs/src/figures/simple-example.svg")
+    savefig(joinpath(FIGDIR, "simple-example.svg"))
 end
 
 function accuracy()
@@ -155,7 +157,65 @@ function accuracy()
             axes_labels_opposite(:y)
         end
     end
-    savefig("docs/src/figures/accuracy.svg")
+    savefig(joinpath(FIGDIR, "accuracy.svg"))
+end
+
+function continued_fractions()
+    x = 10.0 .^ range(-2, stop=4, length=1_000)
+    η = 10.0 .^ (-1:3)
+
+    cfb = zeros(Float64, length(x))
+    cfc1₊ = zeros(Float64, length(x), length(η))
+    cfc2₊ = zeros(ComplexF64, length(x), length(η))
+    cfc1₋ = zeros(Float64, length(x), length(η))
+    cfc2₋ = zeros(ComplexF64, length(x), length(η))
+
+    itersb = zeros(Int, length(x))
+    itersc1₊ = zeros(Int, length(x), length(η))
+    itersc2₊ = zeros(Int, length(x), length(η))
+    itersc1₋ = zeros(Int, length(x), length(η))
+    itersc2₋ = zeros(Int, length(x), length(η))
+
+    λ = 0
+
+    nx = length(x)
+    nη = length(η)
+    for (i,x) in enumerate(x)
+        cfb[i],itersb[i] = bessel_fraction(x, λ)[1:2]
+        for (j,η) in enumerate(η)
+            cfc1₊[i,j],itersc1₊[i,j] = coulomb_fraction1(x, η, λ)[1:2]
+            cfc2₊[i,j],itersc2₊[i,j] = coulomb_fraction2(x, η, λ, 1)[1:2]
+            cfc1₋[i,j],itersc1₋[i,j] = coulomb_fraction1(x, -η, λ)[1:2]
+            cfc2₋[i,j],itersc2₋[i,j] = coulomb_fraction2(x, -η, λ, 1)[1:2]
+        end
+    end
+
+    cfigure("continued fractions", figsize=(9,6)) do
+        csubplot(121) do
+            loglog(x, itersc1₊)
+            loglog(x, itersc2₊, "--")
+            loglog(x, itersb, "k")
+            text(x[1], 0.7itersc1₊[1,1], L"\eta=10^{-1}")
+            text(x[1], 1.3itersc1₊[1,end], L"\eta=10^{3}", rotation=24)
+            text(x[1], 0.25itersc2₊[1,1], L"\eta=10^{-1}", rotation=-65, horizontalalignment="left", verticalalignment="center")
+            text(x[1], 0.8itersc2₊[1,end], L"\eta=10^{3}", rotation=-50, horizontalalignment="left", verticalalignment="center")
+            title(L"\eta > 0")
+            xlabel(L"x")
+        end
+        csubplot(122) do
+            loglog(x, itersc1₋)
+            loglog(x, itersc2₋, "--")
+            loglog(x, itersb, "k")
+            text(x[1], 0.7itersc1₋[1,1], L"\eta=-10^{-1}")
+            text(x[1], 1.3itersc1₋[1,end], L"\eta=-10^{3}", rotation=33)
+            text(x[1], 0.2itersc2₋[1,1], L"\eta=-10^{-1}", rotation=-65, horizontalalignment="left", verticalalignment="center")
+            text(x[1], 0.7itersc2₋[1,end], L"\eta=-10^{3}", rotation=-55, horizontalalignment="left", verticalalignment="center")
+            xlabel(L"x")
+            title(L"\eta < 0")
+            axes_labels_opposite(:y)
+        end
+    end
+    savefig(joinpath(FIGDIR, "continued-fractions.svg"))
 end
 
 macro echo(expr)
@@ -164,6 +224,7 @@ macro echo(expr)
 end
 
 @info "Documentation plots"
-mkpath("docs/src/figures")
+mkpath(FIGDIR)
 @echo simple_example()
 @echo accuracy()
+@echo continued_fractions()
