@@ -135,13 +135,13 @@ end
 # * Interface
 
 """
-    coulombs!(F, F′, G, G′, x::AbstractVector; kwargs...)
+    coulombs!(F, F′, G, G′, x::AbstractVector, η, ℓ; kwargs...)
 
 Loop through all values of `x` and compute all Coulomb
 functions, storing the results in the preallocated matrices `F`, `F′`,
 `G`, `G′`.
 """
-function coulombs!(F, F′, G, G′, x::AbstractVector, η, ℓ::AbstractVector; kwargs...)
+function coulombs!(F, F′, G, G′, x::AbstractVector, η::Number, ℓ::AbstractVector; kwargs...)
     size(F,1) == size(F′,1) == size(G,1) == size(G′,1) == length(x) &&
         size(F,2) == size(F′,2) == size(G,2) == size(G′,2) == length(ℓ) ||
         throw(DimensionError("The dimension of the output arrays do not agree"))
@@ -155,12 +155,50 @@ function coulombs!(F, F′, G, G′, x::AbstractVector, η, ℓ::AbstractVector;
 end
 
 """
-    coulombs(x::AbstractVector, nℓ; kwargs...)
+    coulombs!(F, F′, G, G′, r, Z, k::AbstractVector, ℓ; kwargs...)
+
+Loop through all values of `k` and compute all Coulomb
+functions, storing the results in the preallocated matrices `F`, `F′`,
+`G`, `G′`. `x=k*r` and `η≡-Z/k`, i.e. `Z>0` for attractive potentials.
+"""
+function coulombs!(F, F′, G, G′, r::Number, Z::Number, k::AbstractVector, ℓ::AbstractVector; kwargs...)
+    size(F,1) == size(F′,1) == size(G,1) == size(G′,1) == length(k) &&
+        size(F,2) == size(F′,2) == size(G,2) == size(G′,2) == length(ℓ) ||
+        throw(DimensionError("The dimension of the output arrays do not agree"))
+    for (i,k) in enumerate(k)
+        x = k*r
+        η = -Z/k
+        coulombs!(view(F, i, :),
+                  view(F′, i, :),
+                  view(G, i, :),
+                  view(G′, i, :),
+                  x, η, ℓ; kwargs...)
+    end
+end
+
+"""
+    coulombs(x::AbstractVector, η, ℓ; kwargs...)
 
 Convenience wrapper around [`coulombs!`](@ref) that preallocates output
 matrices of the appropriate dimensions.
 """
-function coulombs(x::AbstractVector{T}, η, ℓ::AbstractVector; kwargs...) where T
+function coulombs(x::T, η::T, ℓ::AbstractVector; kwargs...) where T
+    nℓ = length(ℓ)
+    F = zeros(T, nℓ)
+    F′ = zeros(T, nℓ)
+    G = zeros(T, nℓ)
+    G′ = zeros(T, nℓ)
+    coulombs!(F, F′, G, G′, x, η, ℓ; kwargs...)
+    F, F′, G, G′
+end
+
+"""
+    coulombs(x::AbstractVector, η, ℓ; kwargs...)
+
+Convenience wrapper around [`coulombs!`](@ref) that preallocates output
+matrices of the appropriate dimensions.
+"""
+function coulombs(x::AbstractVector{T}, η::T, ℓ::AbstractVector; kwargs...) where T
     nx = length(x)
     nℓ = length(ℓ)
     F = zeros(T, nx, nℓ)
@@ -171,7 +209,27 @@ function coulombs(x::AbstractVector{T}, η, ℓ::AbstractVector; kwargs...) wher
     F, F′, G, G′
 end
 
-coulombs(x::AbstractVector, η, nℓ::Integer; kwargs...) =
+"""
+    coulombs(r, Z, k::AbstractVector, ℓ; kwargs...)
+
+Convenience wrapper around [`coulombs!`](@ref) that preallocates output
+matrices of the appropriate dimensions.
+"""
+function coulombs(r::T, Z::T, k::AbstractVector{T}, ℓ::AbstractVector; kwargs...) where T
+    nk = length(k)
+    nℓ = length(ℓ)
+    F = zeros(T, nk, nℓ)
+    F′ = zeros(T, nk, nℓ)
+    G = zeros(T, nk, nℓ)
+    G′ = zeros(T, nk, nℓ)
+    coulombs!(F, F′, G, G′, r, Z, k, ℓ; kwargs...)
+    F, F′, G, G′
+end
+
+coulombs(x, η, nℓ::Integer; kwargs...) =
     coulombs(x, η, 0:nℓ-1; kwargs...)
+
+coulombs(x, Z, k, nℓ::Integer; kwargs...) =
+    coulombs(x, Z, k, 0:nℓ-1; kwargs...)
 
 export coulombs!, coulombs
