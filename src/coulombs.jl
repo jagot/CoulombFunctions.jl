@@ -30,10 +30,15 @@ coulomb_normalization(η, ℓ) = 2^ℓ*exp(-π*η/2)*abs(Γ(ℓ+1+im*η))/Γ(2�
 
 # * Continued fractions
 
-coulomb_fraction1(x::T, η::T, n::Integer; cf_algorithm=lentz_thompson, kwargs...) where T =
-    cf_algorithm((n+1)/x+η/(n+1),
-                 k -> -(one(T)+η^2/(n+k)^2),
-                 k -> (2(n+1)+1)*(inv(x)+η/((n+k)^2+(n+k))); kwargs...)
+cf1R²(k,η) = 1 + η^2/k^2
+cf1S(k,η,x) = k/x + η/k
+cf1T(k,η,x) = (2k+1)*(inv(x) + η/(k^2 + k))
+
+coulomb_fraction1(x::T, η::T, n::Integer; cf_algorithm=lentz_thompson,
+                  max_iter=1000 + max(1, 5ceil(Int, √(abs(x^2-2η*x)))), kwargs...) where T =
+    cf_algorithm(cf1S(n+1,η,x),
+                 k -> -cf1R²(n+k,η),
+                 k -> cf1T(n+k,η,x); max_iter=max_iter, kwargs...)
 
 function coulomb_fraction2(x::T, η::T, n::Integer, ω; cf_algorithm=lentz_thompson, kwargs...) where T
     imω = im*ω
