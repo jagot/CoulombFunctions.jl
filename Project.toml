@@ -9,11 +9,14 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
+Formatting = "0.4"
+SpecialFunctions = "2.1"
 julia = "1"
 
 [extras]
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "SpecialFunctions"]
+test = ["Test", "DelimitedFiles", "SpecialFunctions"]
