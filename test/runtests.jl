@@ -91,6 +91,20 @@ include("reference.jl")
             @test j′ ≈ powneg1.(ℓ .- 1)' .* j′ref
             @test y′ ≈ powneg1.(ℓ)' .* y′ref
         end
+
+        @testset "Origin" begin
+            nℓ = 10
+            ℓ = 0:nℓ-1
+            x = [0.0]
+            j, j′, y, y′ = bessels(x, nℓ)
+
+            @test j[1] == 1.0
+            @test j′[1] == 0.0
+            @test all(iszero, j[2:end])
+            @test j′[2] ≈ 1/3
+            @test all(y .== -Inf)
+            @test all(y′ .== Inf)
+        end
     end
 
     @testset "Coulomb functions" begin

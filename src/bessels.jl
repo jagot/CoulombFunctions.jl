@@ -223,6 +223,7 @@ function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), verbosity=0
             j′[2] = one(T)/3 # Derivative of Eq. 10.52.1 https://dlmf.nist.gov/10.52
         end
         if !isnothing(y)
+            # This assumes that the limit is approached from positive x.
             y .= -T(Inf)
             y′ .= T(Inf)
         end
