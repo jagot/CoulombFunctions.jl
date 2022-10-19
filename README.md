@@ -6,7 +6,8 @@
 [![Coverage](https://codecov.io/gh/jagot/SphericalBesselFunctions.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/jagot/SphericalBesselFunctions.jl)
 
 A small Julia package for the evaluation of [spherical Bessel
-functions](https://dlmf.nist.gov/10#PT4) using the approach described
+functions](https://dlmf.nist.gov/10#PT4) and [Coulomb
+functions](https://dlmf.nist.gov/33#PT2) using the approach described
 in
 
 - Barnett, A. R. (1996). The Calculation of Spherical Bessel and
@@ -19,3 +20,7 @@ http://www.fresco.org.uk/programs/barnett/index.htm
 A fix in the rescaling step occurring in the vicinity of roots of the
 `sinc` function was implemented similarly to the suggestion here:
 https://github.com/manoharan-lab/holopy/pull/273/files
+
+Alternatives:
+  * [Bessels.jl](https://github.com/JuliaMath/Bessels.jl/)
+  * [SpecialFunctions.jl](https://github.com/JuliaMath/SpecialFunctions.jl)
