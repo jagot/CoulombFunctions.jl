@@ -1,7 +1,7 @@
 using SphericalBesselFunctions
 import SphericalBesselFunctions: coulomb_fraction1, coulomb_fraction2,
     lentz_thompson, steed_kahan,
-    powneg1
+    powneg1, coulomb_normalization
 using Test
 
 include("reference.jl")
@@ -183,6 +183,17 @@ include("reference.jl")
             compare_with_coulomb_reference("attractive-non-integer-ell", range(0.01, stop=20, length=1000), -1.0, UnitRange(0.334, 5.334))
             compare_with_coulomb_reference("repulsive", range(0.1, stop=20, length=1000), 1.0, UnitRange(-2.1,-0.1))
 
+        end
+
+        @testset "Values at zero" begin
+            F,F′,G,G′ = coulombs(0.0, -1.0, 0:4)
+            C₀η = coulomb_normalization(-1.0, 0)
+            @test all(iszero, F)
+            @test F′[1] ≈ C₀η
+            @test all(iszero, F′[2:end])
+            @test G[1] ≈ 1/C₀η
+            @test all(isinf, G[2:end])
+            @test all(isinf, G′)
         end
     end
 end

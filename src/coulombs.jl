@@ -207,20 +207,19 @@ relations to generate the regular functions ``F_\ell(\eta,x)`` and
 passing `nothing` for `G` and `G′`).
 """
 function coulombs!(F::FF, F′::FF, G::GG, G′::GG, x::T, η::T, ℓ::UnitRange; verbosity=0, kwargs...) where {FF,GG,T<:Number}
-    verbose = get(kwargs, :verbose, false)
     ρtp = turning_point(η, first(ℓ))
     ρtp > x && verbosity > 0 &&
         @warn "Turning point ρ_TP = $(ρtp) > $(x) which may result in loss of accuracy, consider decreasing first ℓ below $(first(ℓ))."
 
     if iszero(x)
+        # The formulæ listed at https://dlmf.nist.gov/33.5#i assume
+        # integer ℓ ≥ 0, it seems.
         F .= false
         for (i,ℓ) in enumerate(ℓ)
             C = coulomb_normalization(η, ℓ)
             F′[i] = (ℓ+1)*C*x^ℓ
             G[i] = inv(zero(x)^ℓ)/((2ℓ+1)*C)
-            G′[i] = -T(Inf) # This is not necessarily true,
-                            # particularly unsure about ℓ = 0, see
-                            # DLMF33.5.2
+            G′[i] = iszero(ℓ) ? T(Inf) : -T(Inf)
         end
         return
     end
