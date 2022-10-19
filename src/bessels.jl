@@ -12,8 +12,13 @@ powneg1(m::Integer) = iseven(m) ? 1 : -1
 
 Affect the reflection symmetries
 ```math
-j_n(-z) = (-)^n j_n(z), \qquad
-y_n(-z) = (-)^{n+1}y_n(z),
+\tag{DLMF10.47.14}
+\begin{aligned}
+j_n(-z) &= (-)^n j_n(z), &
+y_n(-z) &= (-)^{n+1}y_n(z), \\
+j_n'(-z) &= (-)^{n-1} j_n'(z), &
+y_n'(-z) &= (-)^{n} y_n'(z),
+\end{aligned}
 ```
 where the ``+1`` can be added using `offset`.
 """
@@ -22,7 +27,7 @@ function reflect!(g, g′, offset=0)
     for (i,n) in enumerate(n)
         pn = powneg1(n+offset)
         g[i] *= pn
-        g′[i]
+        g′[i] *= -pn
     end
 end
 

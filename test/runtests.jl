@@ -1,5 +1,7 @@
 using SphericalBesselFunctions
-import SphericalBesselFunctions: coulomb_fraction1, coulomb_fraction2, lentz_thompson, steed_kahan
+import SphericalBesselFunctions: coulomb_fraction1, coulomb_fraction2,
+    lentz_thompson, steed_kahan,
+    powneg1
 using Test
 
 include("reference.jl")
@@ -60,6 +62,18 @@ include("reference.jl")
             j,j′,y,y′ = bessels(rd.z, rd.nℓ)
             @test j ≈ transpose(rd.j)
             @test j′ ≈ transpose(rd.j′)
+        end
+
+        @testset "Reflection" begin
+            nℓ = 10
+            ℓ = 0:nℓ-1
+            x = [1.3]
+            j, j′, y, y′ = bessels(-x, nℓ)
+            jref, j′ref, yref, y′ref = bessels(x, nℓ)
+            @test j ≈ powneg1.(ℓ)' .* jref
+            @test y ≈ powneg1.(ℓ .+ 1)' .* yref
+            @test j′ ≈ powneg1.(ℓ .- 1)' .* j′ref
+            @test y′ ≈ powneg1.(ℓ)' .* y′ref
         end
     end
 
