@@ -217,8 +217,10 @@ function coulombs!(F::FF, F′::FF, G::GG, G′::GG, x::T, η::T, ℓ::UnitRange
         for (i,ℓ) in enumerate(ℓ)
             C = coulomb_normalization(η, ℓ)
             F′[i] = (ℓ+1)*C*x^ℓ
-            G[i] = 1/((2ℓ+1)*C) # This seems wrong for ℓ ≥ 1
-            G′[i] = -T(Inf) # This is not necessarily true
+            G[i] = inv(zero(x)^ℓ)/((2ℓ+1)*C)
+            G′[i] = -T(Inf) # This is not necessarily true,
+                            # particularly unsure about ℓ = 0, see
+                            # DLMF33.5.2
         end
         return
     end

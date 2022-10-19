@@ -63,27 +63,27 @@ function simple_coulomb_example()
     cfigure("simple coulomb example",figsize=(7,6)) do
         csubplot(221,nox=true) do
             plot(x, F)
-            margins(0, 0.1)
+            margins(0.05, 0.1)
             ylim(-2.0, 2.0)
             ylabel(L"F_\lambda(\eta,x)")
         end
         csubplot(222,nox=true) do
             plot(x, G)
-            margins(0, 0.1)
+            margins(0.05, 0.1)
             ylim(-2.0, 2.0)
             ylabel(L"G_\lambda(\eta,x)")
             axes_labels_opposite(:y)
         end
         csubplot(223) do
             plot(x, F′)
-            margins(0, 0.1)
+            margins(0.05, 0.1)
             ylim(-2.0, 2.0)
             xlabel(L"x")
             ylabel(L"F'_\lambda(\eta,x)")
         end
         csubplot(224) do
             plot(x, G′)
-            margins(0, 0.1)
+            margins(0.05, 0.1)
             ylim(-2.0, 2.0)
             xlabel(L"x")
             ylabel(L"G'_\lambda(\eta,x)")
