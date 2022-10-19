@@ -193,8 +193,6 @@ function coulomb_upward_recurrence!(G, G′, x⁻¹::T, η, ℓ::UnitRange) wher
     end
 end
 
-coulomb_upward_recurrence!(::Nothing, ::Nothing, args...; _...) = nothing
-
 # * Driver
 
 """
@@ -334,9 +332,6 @@ function coulombs(x::AbstractVector{T}, η::T, ℓ::AbstractVector; kwargs...) w
     F, F′, G, G′
 end
 
-coulombs(r::AbstractVector, Z::Number, k::Number, ℓ::AbstractVector; kwargs...) =
-    coulombs(k*r, -Z/k, ℓ; kwargs...)
-
 """
     coulombs(r, Z, k::AbstractVector, ℓ; kwargs...)
 
@@ -353,6 +348,9 @@ function coulombs(r::T, Z::T, k::AbstractVector{T}, ℓ::AbstractVector; kwargs.
     coulombs!(F, F′, G, G′, r, Z, k, ℓ; kwargs...)
     F, F′, G, G′
 end
+
+coulombs(r, Z::Number, k::Number, ℓ::AbstractVector; kwargs...) =
+    coulombs(k*r, -Z/k, ℓ; kwargs...)
 
 coulombs(x, η, nℓ::Integer; kwargs...) =
     coulombs(x, η, 0:nℓ-1; kwargs...)

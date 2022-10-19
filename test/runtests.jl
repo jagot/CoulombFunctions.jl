@@ -195,5 +195,57 @@ include("reference.jl")
             @test all(isinf, G[2:end])
             @test all(isinf, G′)
         end
+
+        @testset "Convencience wrappers" begin
+            r = 1.0
+            k = 2.0
+            Z = 3.0
+
+            x = k*r
+            η = -Z/k
+
+            nℓ = 5
+            ℓs = 0:nℓ-1
+
+            Fref,F′ref,Gref,G′ref = coulombs(x, η, ℓs)
+
+            @testset "nℓ" begin
+                F,F′,G,G′ = coulombs(r, Z, k, nℓ)
+                @test F ≈ Fref
+                @test F′ ≈ F′ref
+                @test G ≈ Gref
+                @test G′ ≈ G′ref
+
+                F,F′,G,G′ = coulombs(x, η, nℓ)
+                @test F ≈ Fref
+                @test F′ ≈ F′ref
+                @test G ≈ Gref
+                @test G′ ≈ G′ref
+            end
+
+            @testset "x vector" begin
+                F,F′,G,G′ = coulombs([x], η, nℓ)
+                @test size(F) == (1,nℓ)
+                @test size(F′) == (1,nℓ)
+                @test size(G) == (1,nℓ)
+                @test size(G′) == (1,nℓ)
+                @test vec(F) ≈ Fref
+                @test vec(F′) ≈ F′ref
+                @test vec(G) ≈ Gref
+                @test vec(G′) ≈ G′ref
+            end
+
+            @testset "k vector" begin
+                F,F′,G,G′ = coulombs(r, Z, [k], nℓ)
+                @test size(F) == (1,nℓ)
+                @test size(F′) == (1,nℓ)
+                @test size(G) == (1,nℓ)
+                @test size(G′) == (1,nℓ)
+                @test vec(F) ≈ Fref
+                @test vec(F′) ≈ F′ref
+                @test vec(G) ≈ Gref
+                @test vec(G′) ≈ G′ref
+            end
+        end
     end
 end
