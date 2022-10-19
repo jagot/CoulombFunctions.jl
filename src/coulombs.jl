@@ -195,7 +195,7 @@ end
 
 # * Driver
 
-"""
+@doc raw"""
     coulombs!(F, F′, G, G′, x, η, ℓ)
 
 Main routine that computes the continued fractions and the recurrence
