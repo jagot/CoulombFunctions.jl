@@ -2,8 +2,8 @@
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://jagot.github.io/CoulombFunctions.jl/stable/)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://jagot.github.io/CoulombFunctions.jl/dev/)
-[![Build Status](https://github.com/jagot/CoulombFunctions.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/jagot/CoulombFunctions.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/jagot/CoulombFunctions.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/jagot/CoulombFunctions.jl)
+[![Build Status](https://github.com/jagot/CoulombFunctions.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/jagot/CoulombFunctions.jl/actions/workflows/CI.yml?query=branch%3Amaster)
+[![Coverage](https://codecov.io/gh/jagot/CoulombFunctions.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/jagot/CoulombFunctions.jl)
 
 A small Julia package for the evaluation of [spherical Bessel
 functions](https://dlmf.nist.gov/10#PT4) and [Coulomb
