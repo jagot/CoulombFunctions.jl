@@ -56,6 +56,22 @@ include("reference.jl")
 
             @test y ≈ yref
             @test y′ ≈ y′ref
+
+            @testset "Only j" begin
+                j2 = similar(j, 1)
+                j′2 = similar(j′, 1)
+                bessels!(j2, j′2, nothing, nothing, x[1])
+                @test j2 ≈ j[1:1]
+                @test j′2 ≈ j′[1:1]
+            end
+
+            @testset "Only y" begin
+                y2 = similar(y, 1)
+                y′2 = similar(y′, 1)
+                bessels!(nothing, nothing, y2, y′2, x[1])
+                @test y2 ≈ y[1:1]
+                @test y′2 ≈ y′[1:1]
+            end
         end
 
         @testset "Compare regular Bessel functions, with tabulated data, ℓₘₐₓ=$(rd.nℓ-1)" for rd in [bessel_reference_data_1, bessel_reference_data_2]
