@@ -1,4 +1,4 @@
-module SphericalBesselFunctions
+module CoulombFunctions
 
 using LinearAlgebra
 using Formatting

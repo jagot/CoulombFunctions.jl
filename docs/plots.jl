@@ -6,8 +6,8 @@ using PyCall
 Cycler = pyimport("cycler")
 plt.rc("axes", prop_cycle=plt.rcParams["axes.prop_cycle"])
 
-using SphericalBesselFunctions
-import SphericalBesselFunctions: bessel_fraction, coulomb_fraction1, coulomb_fraction2
+using CoulombFunctions
+import CoulombFunctions: bessel_fraction, coulomb_fraction1, coulomb_fraction2
 
 include(joinpath(@__DIR__, "../test/reference.jl"))
 FIGDIR = joinpath(@__DIR__, "src", "figures")
@@ -132,7 +132,7 @@ function accuracy()
             semilogx(x, j, rasterized=true)
             ylim(-0.5,0.5)
             ylabel(L"j_n(x)")
-            title("SphericalBesselFunctions.jl")
+            title("CoulombFunctions.jl")
         end
         csubplot(m,n,ks[2,1],nox=true) do
             semilogx(x, j′, rasterized=true)

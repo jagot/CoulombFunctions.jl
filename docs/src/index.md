@@ -1,4 +1,4 @@
-# SphericalBesselFunctions.jl
+# CoulombFunctions.jl
 
 This library provide efficient and accurate implementations of the
 regular and irregular [spherical Bessel
@@ -76,7 +76,7 @@ f_n = j_n,y_n.
 
 This time, we investigate a larger domain of parameters, but avoid
 smaller values of ``x`` than ``0.1`` since that does not seem to work
-in SpecialFunctions.jl (SphericalBesselFunctions.jl works at
+in SpecialFunctions.jl (CoulombFunctions.jl works at
 ``x\leq0`` as well):
 
 ```julia
@@ -88,13 +88,13 @@ j, j′, y, y′ = bessels(x, nℓ)
 
 ![Accuracy](figures/accuracy.svg)
 
-We note that SphericalBesselFunctions.jl seems to be ~3 times faster
+We note that CoulombFunctions.jl seems to be ~3 times faster
 than SpecialFunctions.jl when evaluating all Bessel functions for a
 fixed value of ``x``, most likely due to extra processing taking place
 when SpecialFunctions.jl does not compute all values simultaneously,
 but one order at a time:
 
-SphericalBesselFunctions.jl:
+CoulombFunctions.jl:
 ```
 BenchmarkTools.Trial:
   memory estimate:  0 bytes

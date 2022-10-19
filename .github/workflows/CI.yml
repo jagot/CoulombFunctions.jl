@@ -82,6 +82,6 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using SphericalBesselFunctions
-            DocMeta.setdocmeta!(SphericalBesselFunctions, :DocTestSetup, :(using SphericalBesselFunctions); recursive=true)
-            doctest(SphericalBesselFunctions)'
+            using CoulombFunctions
+            DocMeta.setdocmeta!(CoulombFunctions, :DocTestSetup, :(using CoulombFunctions); recursive=true)
+            doctest(CoulombFunctions)'

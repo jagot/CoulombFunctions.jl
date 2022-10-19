@@ -4,10 +4,10 @@
 coulombs
 coulombFs
 coulombs!
-SphericalBesselFunctions.coulomb_fraction1
-SphericalBesselFunctions.coulomb_fraction2
-SphericalBesselFunctions.coulomb_downward_recurrence!
-SphericalBesselFunctions.coulomb_upward_recurrence!
-SphericalBesselFunctions.turning_point
-SphericalBesselFunctions.coulomb_normalization
+CoulombFunctions.coulomb_fraction1
+CoulombFunctions.coulomb_fraction2
+CoulombFunctions.coulomb_downward_recurrence!
+CoulombFunctions.coulomb_upward_recurrence!
+CoulombFunctions.turning_point
+CoulombFunctions.coulomb_normalization
 ```

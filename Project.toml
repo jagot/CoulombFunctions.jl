@@ -1,4 +1,4 @@
-name = "SphericalBesselFunctions"
+name = "CoulombFunctions"
 uuid = "a1073327-32f2-4398-bd61-1b686fd668f2"
 authors = ["Stefanos Carlström <stefanos.carlstrom@gmail.com>"]
 version = "0.1.0"

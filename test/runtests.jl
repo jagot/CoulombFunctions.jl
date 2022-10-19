@@ -1,12 +1,12 @@
-using SphericalBesselFunctions
-import SphericalBesselFunctions: coulomb_fraction1, coulomb_fraction2,
+using CoulombFunctions
+import CoulombFunctions: coulomb_fraction1, coulomb_fraction2,
     lentz_thompson, steed_kahan,
     powneg1, coulomb_normalization
 using Test
 
 include("reference.jl")
 
-@testset "SphericalBesselFunctions.jl" begin
+@testset "CoulombFunctions.jl" begin
     @testset "Spherical Bessel functions" begin
         @testset "Accuracy" begin
             nx = 1001
