@@ -87,7 +87,7 @@ which there is space allocated in `j` and `j′` (this can help
 convergence for the terms which are actually of interest).
 """
 function bessel_downward_recurrence!(j, j′, x⁻¹::T, sinc, cosc, nmax, cf1, s;
-                                     tol=100eps(T), verbosity=0, large=∛(floatmax(real(T))), kwargs...) where T
+                                     tol=100eps(real(T)), verbosity=0, large=∛(floatmax(real(T))), kwargs...) where T
     verbosity > 0 && @show x⁻¹, sinc, cosc, nmax, cf1, s
     nj = length(j)
     nj == 0 && return
@@ -203,7 +203,7 @@ It is assumed that all passed arrays are of the same lengths (not
 checked).
 
 """
-function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), verbosity=0, kwargs...) where {J,Y,T<:Number}
+function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(real(T)), verbosity=0, kwargs...) where {J,Y,T<:Number}
     ℓmax = if isnothing(j)
         # No output requested
         isnothing(y) && return
@@ -220,7 +220,9 @@ function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), verbosity=0
             j .= zero(T)
             j[1] = one(T)
             j′ .= zero(T)
-            j′[2] = one(T)/3 # Derivative of Eq. 10.52.1 https://dlmf.nist.gov/10.52
+            if ℓmax > 0
+                j′[2] = one(T)/3 # Derivative of Eq. 10.52.1 https://dlmf.nist.gov/10.52
+            end
         end
         if !isnothing(y)
             # This assumes that the limit is approached from positive x.
@@ -230,7 +232,7 @@ function bessels!(j::J, j′::J, y::Y, y′::Y, x::T; tol=100eps(T), verbosity=0
         return
     end
 
-    reflect = x < zero(T)
+    reflect = real(x) < zero(real(T))
     reflect && (x = -x)
 
     cf1,_,_,s,converged = bessel_fraction(x, ℓmax+1; verbosity=verbosity-1, kwargs...)

@@ -1,5 +1,6 @@
 import SpecialFunctions
 const Γ = SpecialFunctions.gamma
+const lnΓ = SpecialFunctions.loggamma
 
 # * Properties
 @doc raw"""
@@ -28,18 +29,47 @@ turning_point(η, ℓ) = η + √(η^2 + ℓ*(ℓ+1))
 @doc raw"""
     coulomb_normalization(η, ℓ)
 
-Compute the Coulombic [normalization constant](https://dlmf.nist.gov/33.2#ii)
+Compute the Coulombic [normalization constant](https://dlmf.nist.gov/33.2#ii) (Gamow factor)
 ```math
 \tag{DLMF33.2.5}
 C_\ell(\eta) =
 \frac{2^\ell \mathrm{e}^{-\pi\eta/2}|\Gamma(\ell+1+\mathrm{i}\eta)|}{\Gamma(2\ell+2)}.
 ```
 """
-coulomb_normalization(η, ℓ) = 2^ℓ*exp(-π*η/2)*abs(Γ(ℓ+1+im*η))/Γ(2ℓ+2)
+coulomb_normalization(η::Real, ℓ::Real) = 2^ℓ*exp(-π*η/2)*abs(Γ(ℓ+1+im*η))/Γ(2ℓ+2)
+
+@doc raw"""
+    coulomb_normalization(η, ℓ)
+
+Compute the analytic continuation of the Coulombic [normalization
+constant](https://dlmf.nist.gov/33.2#ii) (Gamow factor)
+```math
+\tag{TB2.3b}
+C_\ell(\eta) =
+2^\ell
+\exp\{-\pi\eta/2 +
+[\ln\Gamma(\ell+1+\mathrm{i}\eta) +
+\ln\Gamma(\ell+1-\mathrm{i}\eta)]/2 -
+\ln\Gamma(2\ell+2)
+\},
+```
+where the ``\ln\Gamma`` has its branch cut along the negative real axis; see
+- Thompson, I., & Barnett, A. (1986). Coulomb and Bessel functions of
+  complex arguments and order. Journal of Computational Physics,
+  64(2),
+  490–509. [10.1016/0021-9991(86)90046-x](http://dx.doi.org/10.1016/0021-9991(86)90046-x)
+"""
+coulomb_normalization(η::T, ℓ) where T = (2one(T))^ℓ*exp(-π*η/2 + (lnΓ(ℓ+1+im*η) + lnΓ(ℓ+1-im*η))/2 - lnΓ(2ℓ+2))
 
 # * Continued fractions
 
-cf1R²(k,η) = 1 + η^2/k^2
+# Eq. (3.4) of Thompson and Barnett (1986)
+cf1R²(k::Real, η::Real) = 1 + η^2/k^2
+cf1R(k::Real, η::Real) = √(cf1R²(k,η))
+
+cf1R(k, η) = (2k+1)*coulomb_normalization(η, k)/coulomb_normalization(η, k-1)
+cf1R²(k, η) = cf1R(k, η)^2
+
 cf1S(k,η,x) = k/x + η/k
 cf1T(k,η,x) = (2k+1)*(inv(x) + η/(k^2 + k))
 
@@ -135,7 +165,7 @@ function coulomb_downward_recurrence!(F, F′, x⁻¹::T, η, ℓ::UnitRange, cf
     for i = nF:-1:1
         n = ℓ[i]
         S = n*x⁻¹ + η/n
-        R = √(1 + η²/n^2)
+        R = cf1R(n, η)
 
         Fₙ₋₁ = (S*Fₙ + F′ₙ)/R
         F′ₙ₋₁ = S*Fₙ₋₁ - R*Fₙ
@@ -205,9 +235,9 @@ relations to generate the regular functions ``F_\ell(\eta,x)`` and
 passing `nothing` for `G` and `G′`).
 """
 function coulombs!(F::FF, F′::FF, G::GG, G′::GG, x::T, η::T, ℓ::UnitRange; verbosity=0, kwargs...) where {FF,GG,T<:Number}
-    ρtp = turning_point(η, first(ℓ))
-    ρtp > x && verbosity > 0 &&
-        @warn "Turning point ρ_TP = $(ρtp) > $(x) which may result in loss of accuracy, consider decreasing first ℓ below $(first(ℓ))."
+    ρtp = real(turning_point(η, first(ℓ)))
+    ρtp > real(x) && verbosity > 0 &&
+        @warn "Turning point ρ_TP = $(ρtp) > $(real(x)) which may result in loss of accuracy, consider decreasing first ℓ below $(first(ℓ))."
 
     if iszero(x)
         # The formulæ listed at https://dlmf.nist.gov/33.5#i assume
@@ -230,10 +260,18 @@ function coulombs!(F::FF, F′::FF, G::GG, G′::GG, x::T, η::T, ℓ::UnitRange
     x⁻¹ = inv(x)
     coulomb_downward_recurrence!(F, F′, x⁻¹, η, ℓ, cf1, s; verbosity=verbosity-2, kwargs...)
 
-    cf2,n,_,s,converged = coulomb_fraction2(x, η, ℓ[1], 1; verbosity=verbosity, kwargs...)
-    verbosity > 0 && @show cf2
+    imx = imag(x)
+    ω = abs(imx) < √(eps(real(T))) ? one(T) : sign(imx)
 
-    p,q = real(cf2),imag(cf2)
+    pq1,n,_,s,converged = coulomb_fraction2(x, η, ℓ[1], ω; verbosity=verbosity, kwargs...)
+    verbosity > 0 && @show pq1
+
+    p,q = real(pq1),imag(pq1)
+    pq2 = conj(pq1)
+
+    w = (pq1 - cf1)*(pq2 - cf1)
+    fcm = √(q/w)
+
     Fₘ = F[1]
     F′ₘ = F′[1]
     Gₘ = (F′ₘ-p*Fₘ)/q

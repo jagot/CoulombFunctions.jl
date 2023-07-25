@@ -59,7 +59,7 @@ function lentz_thompson(b₀::T, a, b;
         bₙ = b(n)
         C = val_or_small(bₙ + aₙ/C)
         D = inv(val_or_small(bₙ + aₙ*D))
-        if isreal(D) && D < 0
+        if isreal(D) && real(D) < 0
             # See section 3.2 of
             #
             # - Barnett, A., Feng, D., Steed, J., & Goldfarb, L. (1974). Coulomb
